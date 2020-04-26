@@ -102,7 +102,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--batch_size", default=32, type = int)
-    parser.add_argument("--model_path", default='model', type=str)
+    parser.add_argument("--model_path", default='weights', type=str)
     parser.add_argument('--num_classes', default=2, type=int)
     parser.add_argument('--lr', default=0.005, type=float)
     parser.add_argument('--momentum', default=0.9, type=float)
