@@ -3,6 +3,7 @@ from PIL import Image
 from torchvision import transforms
 from torch.autograd import Variable
 import glob
+import time
 
 transform = transforms.Compose([
             #transforms.Scale(256),
@@ -36,15 +37,16 @@ def predict(use_cuda, model, image_name):
 
 
 if __name__ == '__main__':
-    model_path = '/home/yinliang/works/pytorch_learn/PK/model/best_resnet.pkl'
+    model_path = '/home/yinliang/works/pytorch_learn/Image_Classify_pytorch/weights/best_resnet.pkl'
     img_path = '/home/yinliang/works/pytorch_learn/PK/data/val/0'
     model = torch.load(model_path)
     use_cuda = True if torch.cuda.is_available else False
     if use_cuda:
         model.cuda()
-    img_list = glob.glob(img_path + '/*.jpg')
-    for img in img_list:
-        label, score = predict(model, img)
+    start = time.time()
+    for _ in range(1000):
+        label, score = predict(1, model, '/home/yinliang/works/video_down/wangzhe/240.jpg')
         print(label, score)
-
+    end = time.time()
+    print('time consume: {}'.format(end - start))
 
