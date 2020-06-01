@@ -13,7 +13,7 @@ netron.start(onnx_path)
 
 def onnx2trt():
     '''
-    使用TensorRT/bin/下的　trtexec　来转换模型,
+    使用TensorRT/bin/下的　trtexec　来转换模型,　或者在inference.py模块中序列化模型
     :return:
     '''
     pass
