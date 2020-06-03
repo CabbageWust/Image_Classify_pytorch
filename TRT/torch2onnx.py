@@ -20,8 +20,10 @@ torch.onnx.export(model, input, 'psenet.onnx', input_names=input_name, output_na
 # onnx  -->  trt
 def onnx2trt():
     '''
+
     使用TensorRT/bin/下的　trtexec　来转换模型,
     trtexec --onnx= --saveEngine=
+    使用TensorRT/bin/下的　trtexec　来转换模型,　或者在inference.py模块中序列化模型
     :return:
     '''
     pass
