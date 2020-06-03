@@ -9,12 +9,18 @@ from PIL import Image
 import cv2
 import torchvision
 import pdb
-filename = '/home/yinliang/works/video_down/wangzhe/240.jpg'
+filename = '/home/yinliang/works/pytorch_learn/PK/data/pics/2/5.jpg'
 max_batch_size = 1
-onnx_model_path = 'resnet50.onnx'
+onnx_model_path = 'resnet18.onnx'
 
 TRT_LOGGER = trt.Logger()  # This logger is required to build an engine
 
+def softmax(x):
+    x_exp = np.exp(x)
+    #如果是列向量，则axis=0
+    x_sum = np.sum(x_exp, axis = 1, keepdims = True)
+    s = x_exp / x_sum
+    return s
 
 def get_img_np_nchw(filename):
     image = cv2.imread(filename)
@@ -66,7 +72,7 @@ def allocate_buffers(engine):
 
 
 def get_engine(max_batch_size=1, onnx_file_path="", engine_file_path="", \
-               fp16_mode=False, int8_mode=False, save_engine=False,
+               fp16_mode=False, int8_mode=False, save_engine=True,
                ):
     """Attempts to load a serialized engine if available, otherwise builds a new TensorRT engine and saves it."""
 
@@ -133,21 +139,24 @@ def postprocess_the_outputs(h_outputs, shape_of_output):
 
 
 
-img_np_nchw = get_img_np_nchw(filename)
-img_np_nchw = img_np_nchw.astype(dtype=np.float32)
-
 # These two modes are dependent on hardwares
 fp16_mode = False
 int8_mode = False
-trt_engine_path = '/home/yinliang/works/pytorch_learn/Image_Classify_pytorch/TRT/resnet50.trt'
+trt_engine_path = '/home/yinliang/software/TensorRT-7.0.0.11/bin/resnet50.trt'
 # Build an engine
 engine = get_engine(max_batch_size, onnx_model_path, trt_engine_path, fp16_mode, int8_mode)
+
 # Create the context for this engine
 context = engine.create_execution_context()
 # Allocate buffers for input and output
 inputs, outputs, bindings, stream = allocate_buffers(engine) # input, output: host # bindings
 
+start = time.time()
+
 # Do inference
+
+img_np_nchw = get_img_np_nchw(filename)
+img_np_nchw = img_np_nchw.astype(dtype=np.float32)
 shape_of_output = (max_batch_size, 2)
 # Load data to the buffer
 inputs[0].host = img_np_nchw.reshape(-1)
@@ -157,23 +166,9 @@ t1 = time.time()
 trt_outputs = do_inference(context, bindings=bindings, inputs=inputs, outputs=outputs, stream=stream) # numpy data
 t2 = time.time()
 feat = postprocess_the_outputs(trt_outputs[0], shape_of_output)
+result = softmax(feat)
+score, index = np.max(result, axis=1), np.argmax(result, axis=1)
+print(score[0], index[0])
 
 print('TensorRT ok')
 
-# model = torchvision.models.resnet50(pretrained=True).cuda()
-# resnet_model = model.eval()
-#
-# input_for_torch = torch.from_numpy(img_np_nchw).cuda()
-# t3 = time.time()
-# feat_2= resnet_model(input_for_torch)
-# t4 = time.time()
-# feat_2 = feat_2.cpu().data.numpy()
-# print('Pytorch ok!')
-#
-#
-# mse = np.mean((feat - feat_2)**2)
-# print("Inference time with the TensorRT engine: {}".format(t2-t1))
-# print("Inference time with the PyTorch model: {}".format(t4-t3))
-# print('MSE Error = {}'.format(mse))
-#
-# print('All completed!')
