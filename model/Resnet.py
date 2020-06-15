@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torchvision
+from torchsummary import summary
 
 __all__ = ['ResNet50', 'ResNet101', 'ResNet152']
 
@@ -47,7 +48,7 @@ class Bottleneck(nn.Module):
         return out
 
 class ResNet(nn.Module):
-    def __init__(self,blocks, num_classes=1000, expansion = 4):
+    def __init__(self,blocks, num_classes=2, expansion = 4):
         super(ResNet,self).__init__()
         self.expansion = expansion
 
@@ -87,6 +88,7 @@ class ResNet(nn.Module):
 
         x = self.avgpool(x)
         x = x.view(x.size(0), -1)
+        # x = x.reshape(1, -1)
         x = self.fc(x)
         return x
 
@@ -103,8 +105,11 @@ def ResNet152():
 if __name__=='__main__':
     #model = torchvision.models.resnet50()
     model = ResNet50()
-    print(model)
+    model.cuda()
+    # print(model)
+    #
+    # input = torch.randn(1, 3, 224, 224)
+    # out = model(input)
+    # print(out.shape)
 
-    input = torch.randn(1, 3, 224, 224)
-    out = model(input)
-    print(out.shape)
+    print(summary(model, input_size=(3, 224, 224)))

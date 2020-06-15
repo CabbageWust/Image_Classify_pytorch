@@ -7,6 +7,7 @@ from torch.autograd import Variable
 from torch.utils.data import DataLoader
 import argparse
 from dataset import MyDataSet
+from model import Resnet
 import time
 import os
 import numpy as np
@@ -101,12 +102,12 @@ def train_model(model, data_sizes, num_epochs, scheduler, dataloaders,criterion,
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--batch_size", default=32, type = int)
+    parser.add_argument("--batch_size", default=16, type = int)
     parser.add_argument("--model_path", default='weights', type=str)
     parser.add_argument('--num_classes', default=2, type=int)
     parser.add_argument('--lr', default=0.005, type=float)
     parser.add_argument('--momentum', default=0.9, type=float)
-    parser.add_argument('--num_epochs', default=5, type=int)
+    parser.add_argument('--num_epochs', default=1, type=int)
     parser.add_argument('--step_size', default=2, type=int)
     args = parser.parse_args()
 
@@ -164,10 +165,11 @@ if __name__ == '__main__':
     #print(len(dataloaders['train']))
 
     # define the model
-    model = models.resnet50(pretrained=True)
-    num_ftrs = model.fc.in_features
-    model.fc = nn.Linear(num_ftrs, num_classes)
+    # model = models.resnet50(pretrained=True)
+    # num_ftrs = model.fc.in_features
+    # model.fc = nn.Linear(num_ftrs, num_classes)
 
+    model = Resnet.ResNet50()
     if use_gpu:
         model.cuda()
 
@@ -183,5 +185,5 @@ if __name__ == '__main__':
                         optimizer= optimizer)
 
 
-    torch.save(model, os.path.join(model_path, 'best_resnet.pkl'))
+    torch.save(model, os.path.join(model_path, 'best_resnet.pth'))
 
